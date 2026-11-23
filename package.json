@@ -1,0 +1,14 @@
+{
+  "name": "sre-dependency-failure-containment-planner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "规划依赖故障的隔离、限流和恢复边界（只输出计划，不执行真实控制）",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test",
+    "plan": "node src/cli.js"
+  }
+}

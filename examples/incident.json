@@ -1,0 +1,55 @@
+{
+  "name": "shared-cache-outage",
+  "slo": { "maxErrorRate": 0.01, "maxP99Ms": 500 },
+  "nodes": {
+    "edge": {
+      "kind": "service",
+      "critical": true,
+      "capacityRps": 4000,
+      "currentRps": 1500,
+      "dependsOn": ["api"],
+      "retries": { "maxAttempts": 2 }
+    },
+    "api": {
+      "kind": "service",
+      "critical": true,
+      "capacityRps": 2000,
+      "currentRps": 900,
+      "dependsOn": ["cache", "db"],
+      "retries": { "maxAttempts": 3 },
+      "fallbacks": { "cache": "db" }
+    },
+    "worker": {
+      "kind": "service",
+      "critical": false,
+      "capacityRps": 600,
+      "currentRps": 300,
+      "dependsOn": ["cache", "db"],
+      "retries": { "maxAttempts": 2 }
+    },
+    "cache": {
+      "kind": "dependency",
+      "shared": true,
+      "capacityRps": 8000,
+      "errorRate": 0.85
+    },
+    "db": {
+      "kind": "dependency",
+      "capacityRps": 1500,
+      "errorRate": 0.005
+    }
+  },
+  "isolationSwitches": [
+    {
+      "id": "disable-recommendations",
+      "shedsRps": { "api": 200 }
+    },
+    {
+      "id": "pause-batch-export",
+      "shedsRps": { "worker": 100 }
+    }
+  ],
+  "recoveryProbes": [
+    { "id": "cache-readiness", "target": "cache", "successThreshold": 0.95, "windowSeconds": 30 }
+  ]
+}
